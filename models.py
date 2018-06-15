@@ -1,7 +1,8 @@
 import torchvision.models as models
 import torch.nn as nn
 import torch.nn.functional as F
-
+from rbd import get_saliency_rbd, get_saliency_ft
+from rbd import binarise_saliency_map
 
 class Retrieval_Model(nn.Module):
     def __init__(self, model, pool):
@@ -33,3 +34,14 @@ def load_model(arch, pretrained):
     else:
         print('Other architectures not supported')
     return model.cuda()
+
+def get_supervised_model():
+    pass
+    
+def get_unsupervised_model(model_type):
+    model_type = model_type.lower()
+    if 'rbd' in model_type:
+        return get_saliency_rbd
+    elif 'ft' in model_type:
+        return get_saliency_ft
+
