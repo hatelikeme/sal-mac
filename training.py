@@ -72,7 +72,4 @@ def train_contrastive(model, optimizer, criterion, scheduler, epochs, dataset, b
         scheduler.step()
         print('epoch # {}, mean loss {}'.format(epoch, loss_mean/len(dataset)))
     return model
-
-
-
     

@@ -23,6 +23,18 @@ class Retrieval_Model(nn.Module):
         x = self.pool(x)
         return x
 
+class Joint_Model(nn.Module):
+    def __init__(self, sal_model, ret_model):
+        super(Joint_Model, self).__init__()
+        self.sal_model = sal_model
+        self.ret_model = ret_model
+
+    def forward(self, x):
+        x = self.sal_model(x)
+        x = self.ret_model(x)
+        return x
+
+
 def load_model(arch, pretrained):
     arch = arch.lower()
     if 'vgg' in arch:
@@ -37,11 +49,11 @@ def load_model(arch, pretrained):
 
 def get_supervised_model():
     pass
-    
+
 def get_unsupervised_model(model_type):
     model_type = model_type.lower()
     if 'rbd' in model_type:
         return get_saliency_rbd
     elif 'ft' in model_type:
-        return get_saliency_ft
+        return get_saliency_ft        
 

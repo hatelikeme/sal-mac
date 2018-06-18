@@ -14,6 +14,7 @@ from models import load_model, Retrieval_Model
 from datasets import Training_Contrastive_Dataset
 from losses import ContrastiveLoss
 from training import train
+from models import get_unsupervised_model
 
 from PIL import ImageFile
 
@@ -35,6 +36,8 @@ parser.add_argument('--epochs', default=30)
 parser.add_argument('--lr', '-lr', default=0.0001)
 parser.add_argument('--batch_size', '-bs', default=32)
 parser.add_argument('--optimizer', '-o', default = 'adam')
+parser.add_argument('--saliency', '-s', default = True)
+parser.add_argument('--sal-supervised', '-ss', default = False)
 
 transform = transforms.Compose([
     transforms.ToTensor()
@@ -47,8 +50,12 @@ def main():
     pretrained = args.pretrained
     pool = args.pool
     model = Retrieval_Model(load_model(arch, pretrained), pool)
-    trainable = args.train
-    if trainable:
+
+    sal_model = None
+    if args.saliency is not None:
+        sal_model = get_unsupervised_model('rbd')
+
+    if args.train:
         datadir = args.data
         loss = args.loss
         epochs = args.epochs
@@ -56,7 +63,7 @@ def main():
         datadir = args.data
         lr = args.lr
         batch_size = args.batch_size
-        dataset = Training_Contrastive_Dataset(dataset, datadir, transform)
+        dataset = Training_Contrastive_Dataset(dataset, datadir, transform, args.saliency)
         optimizer = args.optimizer
         train(model, dataset, lr, optimizer, epochs, loss, batch_size, 0.001)
 
