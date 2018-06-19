@@ -10,11 +10,10 @@ import torchvision.transforms as transforms
 import torchvision.models as models
 import torchvision.datasets as datasets
 
-from models import load_model, Retrieval_Model
+from models import get_unsupervised_model, load_model, Retrieval_Model
 from datasets import Training_Contrastive_Dataset
 from losses import ContrastiveLoss
 from training import train
-from models import get_unsupervised_model
 
 from PIL import ImageFile
 
