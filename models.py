@@ -34,7 +34,6 @@ class Joint_Model(nn.Module):
         x = self.ret_model(x)
         return x
 
-
 def load_model(arch, pretrained):
     arch = arch.lower()
     if 'vgg' in arch:
