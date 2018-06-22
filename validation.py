@@ -29,27 +29,26 @@ class ValidationDataset(Dataset):
         rv = self.images[idx]
         return (self.transform_fn(rv), rv)
 
-def validate(model, dataset):
-    
 
-def calculate_map(test_data, vgg_transform, model, gt_dir, datadir):
+def calculate_map(model, transform, gt_dir, datadir):
+    test_data = ValidationDataset(datadir, transform)
     db_names, db_codes = compute_db(test_data, model)
     aps = []
     for file in os.listdir(gt_dir):
         if 'query' in file:
             q_name, rect = process_query(os.path.join(gt_dir, file))
-            vgg_q = single_im_loader(os.path.join(datadir, q_name), rect, vgg_transform)
+            vgg_q = single_im_loader(os.path.join(datadir, q_name), rect, transform)
             code = model(Variable(vgg_q, requires_grad = False).cuda())
             distlist = generate_r_list(code.cpu().data.numpy(), db_codes)
             gen_txt_file(distlist, db_names)
             query_name = file.replace('_query.txt', '')
-            ap = compute_ap(query_name)
+            ap = compute_ap(query_name, gt_dir)
             aps.append(ap)
     return np.mean(aps)
 
-def compute_ap(query):
+def compute_ap(query, gt_dir):
     process = subprocess.Popen('./compute_ap {} ranked_list.txt'.format(query), shell = True, stdout=subprocess.PIPE,
-                              cwd = './oxford_gt')
+                              cwd = gt_dir)
     output = process.stdout.read()
     return float(output)
 
@@ -90,6 +89,7 @@ def compute_db(test_data, model):
     codes = []
     idx = 0
     for vgg_im, filename in tqdm(test_data):
+        print(vgg_im)
         vgg_im = Variable(vgg_im).cuda()
         output = model(vgg_im)
         names.append(filename)

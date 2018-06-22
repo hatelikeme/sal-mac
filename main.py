@@ -14,7 +14,7 @@ from models import get_unsupervised_model, load_model, Retrieval_Model
 from datasets import Training_Contrastive_Dataset
 from losses import ContrastiveLoss
 from training import train
-from validation import init_validation
+from validation import calculate_map
 
 from PIL import ImageFile
 
@@ -55,9 +55,7 @@ def main():
     sal_model = None
     if args.saliency is not None:
         sal_model = get_unsupervised_model('rbd')
-    print(args.train)
     if args.train:
-        print('we here somehow')
         datadir = args.data
         loss = args.loss
         epochs = args.epochs
@@ -68,7 +66,7 @@ def main():
         dataset = Training_Contrastive_Dataset(dataset, datadir, transform, args.saliency)
         optimizer = args.optimizer
         train(model, dataset, lr, optimizer, epochs, loss, batch_size, 0.001)
-    mAP = init_validation(args.val_dataset, transform, model)
+    mAP = calculate_map(transform, model, 'data/oxford_gt', 'data/oxford5k')
     print('mAP: {}'.format(mAP))
     
 
