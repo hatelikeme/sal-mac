@@ -36,7 +36,7 @@ parser.add_argument('--epochs', default=30)
 parser.add_argument('--lr', '-lr', default=0.0001)
 parser.add_argument('--batch_size', '-bs', default=32)
 parser.add_argument('--optimizer', '-o', default = 'adam')
-parser.add_argument('--saliency', '-s', default = True)
+parser.add_argument('--saliency', '-s', default = '', type = str)
 parser.add_argument('--sal-supervised', '-ss', default = False)
 parser.add_argument('--val_dataset', default = 'oxford5k')
 
@@ -53,7 +53,7 @@ def main():
     model = Retrieval_Model(load_model(arch, pretrained), pool)
 
     sal_model = None
-    if args.saliency is not None:
+    if args.saliency is not '':
         sal_model = get_unsupervised_model('rbd')
     if args.train:
         datadir = args.data
@@ -66,7 +66,7 @@ def main():
         dataset = Training_Contrastive_Dataset(dataset, datadir, transform, args.saliency)
         optimizer = args.optimizer
         train(model, dataset, lr, optimizer, epochs, loss, batch_size, 0.001)
-    mAP = calculate_map(transform, model, 'data/oxford_gt', 'data/oxford5k')
+    mAP = calculate_map(model, transform, 'data/oxford_gt', 'data/oxford5k', sal_model)
     print('mAP: {}'.format(mAP))
     
 

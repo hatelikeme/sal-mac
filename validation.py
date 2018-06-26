@@ -13,16 +13,21 @@ from scipy.spatial.distance import cosine
 from tqdm import tqdm
 
 class ValidationDataset(Dataset):
-    def __init__(self, root, transform):
+    def __init__(self, root, transform, sal_model):
         self.root = root
         self.images = os.listdir(root)
         self.transform = transform
+        self.sal = sal_model
     
     def __len__(self):
         return len(self.images)
     
     def transform_fn(self, path):
         im = Image.open(os.path.join(self.root, path))
+        if self.sal is not None:
+            salmap = self.sal(os.path.join(self.root, path))
+            im = np.matmul(salmap, im)
+            im = Image.fromarray(im.astype('uint8'), 'RGB')
         return self.transform(im).unsqueeze(0)
     
     def __getitem__(self, idx):
@@ -30,8 +35,8 @@ class ValidationDataset(Dataset):
         return (self.transform_fn(rv), rv)
 
 
-def calculate_map(model, transform, gt_dir, datadir):
-    test_data = ValidationDataset(datadir, transform)
+def calculate_map(model, transform, gt_dir, datadir, sal_model = None):
+    test_data = ValidationDataset(datadir, transform, sal_model)
     db_names, db_codes = compute_db(test_data, model)
     aps = []
     for file in os.listdir(gt_dir):
@@ -40,7 +45,7 @@ def calculate_map(model, transform, gt_dir, datadir):
             vgg_q = single_im_loader(os.path.join(datadir, q_name), rect, transform)
             code = model(Variable(vgg_q, requires_grad = False).cuda())
             distlist = generate_r_list(code.cpu().data.numpy(), db_codes)
-            gen_txt_file(distlist, db_names)
+            gen_txt_file(distlist, db_names, gt_dir)
             query_name = file.replace('_query.txt', '')
             ap = compute_ap(query_name, gt_dir)
             aps.append(ap)
@@ -52,13 +57,14 @@ def compute_ap(query, gt_dir):
     output = process.stdout.read()
     return float(output)
 
-def gen_txt_file(distlist, names):
+def gen_txt_file(distlist, names, gt_dir):
     act = []
     for idx in distlist:
         act.append(names[idx])
-    with open('./oxford_gt/ranked_list.txt', 'w') as f:
+    with open(os.path.join(gt_dir, 'ranked_list.txt'), 'wb') as f:
         for item in act:
-            f.write(item.replace('.jpg', '') + '\n')
+            it = item.replace('.jpg', '') + '\n'
+            f.write(it.encode())
 
 def generate_r_list(query, codes):
     distances = []
@@ -89,7 +95,6 @@ def compute_db(test_data, model):
     codes = []
     idx = 0
     for vgg_im, filename in tqdm(test_data):
-        print(vgg_im)
         vgg_im = Variable(vgg_im).cuda()
         output = model(vgg_im)
         names.append(filename)
