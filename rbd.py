@@ -99,6 +99,8 @@ def get_saliency_rbd(img_path):
 	# Saliency Optimization from Robust Background Detection, Wangjiang Zhu, Shuang Liang, Yichen Wei and Jian Sun, IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2014
 	if not isinstance(img_path, np.ndarray):
 		img = skimage.io.imread(img_path)
+	else:
+		img = img_path
 
 	if len(img.shape) != 3: # got a grayscale image
 		img = skimage.color.gray2rgb(img)
