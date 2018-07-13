@@ -78,9 +78,10 @@ def single_im_loader(impath, rect, vgg_transform, sal_model = None):
     im = Image.open(impath)
     im = np.asarray(im)
     im = im[rect[0]: rect[2], rect[1]: rect[3]]
-    im = Image.fromarray(im)
     if sal_model is not None:
-        im = sal_model(im)
+        salmap = sal_model(im)
+        im = np.matmul(im, salmap)
+    im = Image.fromarray(im)
     vgg_im = vgg_transform(im)
     return vgg_im.unsqueeze(0).cuda()
 
