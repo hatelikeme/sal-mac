@@ -15,6 +15,7 @@ from datasets import Training_Contrastive_Dataset
 from losses import ContrastiveLoss
 from training import train
 from validation import calculate_map
+from downloading import datasets_download
 
 from PIL import ImageFile
 
@@ -66,9 +67,9 @@ def main():
         dataset = Training_Contrastive_Dataset(dataset, datadir, transform, args.saliency)
         optimizer = args.optimizer
         train(model, dataset, lr, optimizer, epochs, loss, batch_size, 0.001)
+    datasets_download(args.val_dataset)
     mAP = calculate_map(model, transform, 'data/oxford_gt', 'data/oxford5k', sal_model)
     print('mAP: {}'.format(mAP))
-    
 
 if __name__ == '__main__':
     main()

@@ -9,7 +9,7 @@ OX_DATADIR = 'data/oxford5k'
 OX_GTDIR = 'data/oxford_gt'
 
 
-def datasets_download(dataset, transform, model):
+def datasets_download(dataset):
     if 'paris' in dataset:
         datapath = PA_DATADIR
         gtpath = PA_GTDIR
@@ -33,9 +33,14 @@ def download_and_extract(url, path):
 
 def download_dataset(dataset):
     if 'paris' in dataset:
+        print('downloading {} dataset part 1'.format(dataset))
         download_and_extract('http://www.robots.ox.ac.uk/~vgg/data/parisbuildings/paris_1.tgz', 'data/paris6k')
+        print('downloading {} dataset part 2'.format(dataset))
         download_and_extract('http://www.robots.ox.ac.uk/~vgg/data/parisbuildings/paris_2.tgz', 'data/paris6k')
+        print('downloading {} dataset ground truth'.format(dataset))
         download_and_extract('http://www.robots.ox.ac.uk/~vgg/data/parisbuildings/paris_120310.tgz', 'data/paris_gt')
     elif 'oxford' in dataset:
+        print('downloading {} dataset'.format(dataset))
         download_and_extract('http://www.robots.ox.ac.uk/~vgg/data/oxbuildings/oxbuild_images.tgz', 'data/oxford5k')
+        print('downloading {} dataset ground truth'.format(dataset))
         download_and_extract('http://www.robots.ox.ac.uk/~vgg/data/oxbuildings/gt_files_170407.tgz', 'data/oxford_gt')
