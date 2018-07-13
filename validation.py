@@ -27,7 +27,7 @@ class ValidationDataset(Dataset):
         if self.sal is not None:
             salmap = self.sal(os.path.join(self.root, path))
             salmap = salmap[...,np.newaxis]
-            im = np.matmul(salmap, im)
+            im = salmap * im
             im = Image.fromarray(im.astype('uint8'), 'RGB')
         return self.transform(im).unsqueeze(0)
     
@@ -82,7 +82,7 @@ def single_im_loader(impath, rect, vgg_transform, sal_model = None):
     if sal_model is not None:
         salmap = sal_model(im)
         salmap = salmap[..., np.newaxis]
-        im = np.matmul(im, salmap)
+        im = im * salmap
     im = Image.fromarray(im)
     vgg_im = vgg_transform(im)
     return vgg_im.unsqueeze(0).cuda()
