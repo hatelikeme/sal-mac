@@ -105,4 +105,5 @@ def compute_db(test_data, model):
         code = output.cpu().data.numpy()
         codes.append(code)
         idx += 1
+        print('doing good stuff {}'.format(idx))
     return names, codes
