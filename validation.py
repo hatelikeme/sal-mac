@@ -35,7 +35,6 @@ class ValidationDataset(Dataset):
         rv = self.images[idx]
         return (self.transform_fn(rv), rv)
 
-
 def calculate_map(model, transform, gt_dir, datadir, sal_model = None):
     test_data = ValidationDataset(datadir, transform, sal_model)
     db_names, db_codes = compute_db(test_data, model)
