@@ -42,7 +42,7 @@ def calculate_map(model, transform, gt_dir, datadir, sal_model = None):
     for file in os.listdir(gt_dir):
         if 'query' in file:
             q_name, rect = process_query(os.path.join(gt_dir, file))
-            vgg_q = single_im_loader(os.path.join(datadir, q_name), rect, transform)
+            vgg_q = single_im_loader(os.path.join(datadir, q_name), rect, transform, sal_model)
             code = model(Variable(vgg_q, requires_grad = False).cuda())
             distlist = generate_r_list(code.cpu().data.numpy(), db_codes)
             gen_txt_file(distlist, db_names, gt_dir)
@@ -74,11 +74,13 @@ def generate_r_list(query, codes):
     sorted_indicies = np.argsort(distances)
     return sorted_indicies
 
-def single_im_loader(impath, rect, vgg_transform):
+def single_im_loader(impath, rect, vgg_transform, sal_model = None):
     im = Image.open(impath)
     im = np.asarray(im)
     im = im[rect[0]: rect[2], rect[1]: rect[3]]
     im = Image.fromarray(im)
+    if sal_model is not None:
+        im = sal_model(im)
     vgg_im = vgg_transform(im)
     return vgg_im.unsqueeze(0).cuda()
 
