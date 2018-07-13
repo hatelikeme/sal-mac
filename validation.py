@@ -83,7 +83,7 @@ def single_im_loader(impath, rect, vgg_transform, sal_model = None):
         salmap = sal_model(im)
         salmap = salmap[..., np.newaxis]
         im = im * salmap
-    im = Image.fromarray(im)
+    im = Image.fromarray(im.astype('uint8'), 'RGB')
     vgg_im = vgg_transform(im)
     return vgg_im.unsqueeze(0).cuda()
 
