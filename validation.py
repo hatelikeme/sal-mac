@@ -26,6 +26,7 @@ class ValidationDataset(Dataset):
         im = Image.open(os.path.join(self.root, path))
         if self.sal is not None:
             salmap = self.sal(os.path.join(self.root, path))
+            salmap = salmap[...,np.newaxis]
             im = np.matmul(salmap, im)
             im = Image.fromarray(im.astype('uint8'), 'RGB')
         return self.transform(im).unsqueeze(0)
@@ -80,6 +81,7 @@ def single_im_loader(impath, rect, vgg_transform, sal_model = None):
     im = im[rect[0]: rect[2], rect[1]: rect[3]]
     if sal_model is not None:
         salmap = sal_model(im)
+        salmap = salmap[..., np.newaxis]
         im = np.matmul(im, salmap)
     im = Image.fromarray(im)
     vgg_im = vgg_transform(im)
