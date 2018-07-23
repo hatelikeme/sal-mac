@@ -17,7 +17,7 @@ def check_image(im, imdir):
         try:
             im = Image.open(impath)
             w, h = im.size
-            if w > 100 and h > 100:
+            if w > 200 and h > 200:
                 return True
             return False
         except:
