@@ -23,7 +23,7 @@ class Training_Contrastive_Dataset():
 
     def read_img(self, image):
         impath = os.path.join(self.root, image)
-        image = Image.open(impath)
+        image = Image.open(impath).convert('RGB')
         image = self.transforms(image)
         image = image.unsqueeze(0)
         return image
