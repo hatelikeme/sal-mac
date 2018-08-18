@@ -65,6 +65,15 @@ class Training_Contrastive_Dataset():
     def __len__(self):
         return len(self.data)
 
+    def apply_salmap(self, img, item):
+        sal = get_saliency_rbd(os.path.join(self.root, item))
+        sal = binarise_saliency_map(sal)
+        idd = (sal == 0)
+        idd = torch.from_numpy(idd.astype(np.uint8)).type(torch.FloatTensor)
+        idd = idd.unsqueeze(0).unsqueeze(0)
+        img = torch.mul(img, idd)
+        return img
+
     def __getitem__(self, idx):
         item = self.data[idx]
 
@@ -72,16 +81,6 @@ class Training_Contrastive_Dataset():
         im2 = self.read_img(item[1])
 
         if self.salient:
-            sal1 = get_saliency_rbd(os.path.join(self.root, item[0]))
-            sal2 = get_saliency_rbd(os.path.join(self.root, item[1]))
-            sal1 = binarise_saliency_map(sal1)
-            sal2 = binarise_saliency_map(sal2)
-            idd1 = (sal1 == 0)
-            idd2 = (sal2 == 0)
-            idd1 = torch.from_numpy(idd1.astype(np.uint8)).type(torch.FloatTensor)
-            idd2 = torch.from_numpy(idd2.astype(np.uint8)).type(torch.FloatTensor)
-            idd1 = idd1.unsqueeze(0).unsqueeze(0)
-            idd2 = idd2.unsqueeze(0).unsqueeze(0)
-            im1 = torch.mul(im1, idd1)
-            im2 = torch.mul(im2, idd2)
+            im1 = self.apply_salmap(im1, item[0])
+            im2 = self.apply_salmap(im2, item[1])
         return (im1, im2, item[2])
